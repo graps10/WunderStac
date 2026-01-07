@@ -850,7 +850,7 @@ GameObject:
   - component: {fileID: 3385659548573827968}
   - component: {fileID: 3318559829932426608}
   - component: {fileID: 6141808769643406149}
-  - component: {fileID: 7288524792877756375}
+  - component: {fileID: 6141808769643406150}
   m_Layer: 5
   m_Name: MainMenuCanvas
   m_TagString: Untagged
@@ -991,7 +991,7 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &7288524792877756375
+--- !u!114 &6141808769643406150
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1000,11 +1000,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 2964454114738232319}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f737c966139342b2b974aa74c6db0fe3, type: 3}
+  m_Script: {fileID: 11500000, guid: e30f053171e84b6d9c477178ba1ee13d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loadingSlider: {fileID: 0}
-  fakeLoadingTime: 2
+  gameTitle: {fileID: 1232282122}
+  playButton: {fileID: 1879846653}
+  statsButton: {fileID: 198394261}
+  settingsButton: {fileID: 1873141050}
+  animDuration: 0.4
+  staggerDelay: 0.1
+  easeType: 27
 --- !u!224 &8432160797941872281
 RectTransform:
   m_ObjectHideFlags: 0
