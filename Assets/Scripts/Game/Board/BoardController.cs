@@ -10,6 +10,7 @@ namespace Game.Board
     {
         private const float Fill_Delay = 0.2f;
         private const float Destroy_Delay = 0.2f;
+        private const float Letters_Collect_Delay = 0.3f;
         private const int Max_Gen_Attempts = 100;
         private const int Grid_Offset_Formula_Denom = 2; // For centering logic
         private const float Grid_Offset_Formula_Add = 0.5f;
@@ -147,7 +148,7 @@ namespace Game.Board
             {
                 // Valid Move
                 GameManager.Instance?.ConsumeMove();
-                ProcessMatches(matches);
+                yield return StartCoroutine(ProcessMatchesRoutine(matches));
                 //Debug.Log($"Match Found! Count: {matches.Count}");
             }
             else
@@ -169,30 +170,50 @@ namespace Game.Board
             }
         }
 
-        private void ProcessMatches(List<GamePiece> matches)
+        private IEnumerator ProcessMatchesRoutine(List<GamePiece> matches)
         {
             HashSet<GamePiece> piecesToDestroy = new HashSet<GamePiece>(matches);
             
             foreach (var piece in matches)
                 CheckForLettersAround(piece.X, piece.Y, piecesToDestroy);
             
-            foreach (var piece in piecesToDestroy)
+            List<GamePiece> normalPieces = new List<GamePiece>();
+            List<GamePiece> letters = new List<GamePiece>();
+
+            foreach (var p in piecesToDestroy)
             {
-                if (piece != null)
-                {
-                    if (WordManager.Instance != null && WordManager.Instance.IsLetter(piece.Type))
-                        WordManager.Instance.CollectLetter(piece.Type, piece.transform.position);
+                if (p == null) continue;
+                
+                _allPieces[p.X, p.Y] = null;
 
-                    if (GameManager.Instance != null)
-                    {
-                        int scoreToAdd = GameManager.Instance.GetCurrentProfile().scorePerPiece;
-                        GameManager.Instance?.AddScore(scoreToAdd);
-                    }
-
-                    _allPieces[piece.X, piece.Y] = null;
-                    piece.DestroyPiece();
-                }
+                if (WordManager.Instance != null && WordManager.Instance.IsLetter(p.Type))
+                    letters.Add(p);
+                else
+                    normalPieces.Add(p);
             }
+            
+            foreach (var p in normalPieces)
+            {
+                p.DestroyPiece();
+                if (GameManager.Instance != null)
+                    GameManager.Instance.AddScore(GameManager.Instance.GetCurrentProfile().scorePerPiece);
+            }
+            
+            if (letters.Count > 0)
+                yield return new WaitForSeconds(Letters_Collect_Delay);
+            
+            foreach (var l in letters)
+            {
+                if (WordManager.Instance != null)
+                    WordManager.Instance.CollectLetter(l.Type, l.transform.position);
+
+                l.DestroyPiece();
+                
+                if (GameManager.Instance != null)
+                    GameManager.Instance.AddScore(GameManager.Instance.GetCurrentProfile().scorePerLetter);
+            }
+            
+            yield return new WaitForSeconds(Destroy_Delay);
             
             StartCoroutine(FillBoardRoutine());
         }
@@ -203,20 +224,25 @@ namespace Game.Board
         
         private IEnumerator FillBoardRoutine()
         {
+            //Debug.Log($"[FILL] Waiting for Destroy_Delay ({Destroy_Delay}s)... Time: {Time.time}");
             yield return new WaitForSeconds(Destroy_Delay);
             
+            //Debug.Log($"[FILL] Starting Refill... Time: {Time.time}");
             yield return RefillBoard();
+            //Debug.Log($"[FILL] Refill Finished (Visuals done). Time: {Time.time}");
             
-            // Check if new matches formed after falling
+            //Debug.Log($"[FILL] Waiting Human Delay ({Fill_Delay}s)...");
+            yield return new WaitForSeconds(Fill_Delay);
+            
             var matches = MatchFinder.FindMatches(_allPieces, width, height);
             if (matches.Count > 0)
             {
-                yield return new WaitForSeconds(Fill_Delay);
-                ProcessMatches(matches);
+                //Debug.Log($"<color=cyan>[CASCADE] Found {matches.Count} new matches after fall! Time: {Time.time}</color>");
+                StartCoroutine(ProcessMatchesRoutine(matches));
             }
             else
             {
-                // End of Turn
+                //Debug.Log("[TURN END] No more matches. Input Unlocked.");
                 _isSwapping = false; 
             }
         }
@@ -336,14 +362,20 @@ namespace Game.Board
             CheckNeighbor(x, y + 1, piecesToDestroy); // Top
             CheckNeighbor(x, y - 1, piecesToDestroy); // Bottom
         }
-
+        
         private void CheckNeighbor(int x, int y, HashSet<GamePiece> set)
         {
             if (x < 0 || x >= width || y < 0 || y >= height) return;
 
             GamePiece neighbor = _allPieces[x, y];
-            if (neighbor != null && !set.Contains(neighbor) && WordManager.Instance.IsLetter(neighbor.Type))
-                set.Add(neighbor);
+            if (neighbor != null && WordManager.Instance.IsLetter(neighbor.Type))
+            {
+                if (!set.Contains(neighbor))
+                {
+                    //Debug.Log($"<color=orange>[NEIGHBOR HIT] Found Letter {neighbor.Type} at [{x}, {y}]. It was neighbor to a match!</color>");
+                    set.Add(neighbor);
+                }
+            }
         }
 
         #endregion
