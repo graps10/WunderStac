@@ -9,8 +9,8 @@ namespace Game.Board
         
         [SerializeField] private SpriteRenderer spriteRenderer;
 
-        public int X;
-        public int Y;
+        public int X { get; private set; }
+        public int Y { get; private set; }
         public ItemType Type { get; private set; }
 
         public void Init(int x, int y, ItemType type, Sprite sprite)

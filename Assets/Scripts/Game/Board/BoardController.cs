@@ -20,7 +20,7 @@ namespace Game.Board
         [SerializeField] private float spacing = 0.1f;
         
         [Header("Generation Logic")]
-        [SerializeField] private PieceProvider _pieceProvider;
+        [SerializeField] private PieceProvider pieceProvider;
         
         [Header("Input Settings")]
         [SerializeField] private float swapDuration = 0.25f;
@@ -43,7 +43,7 @@ namespace Game.Board
 
         private void Start()
         {
-            _pieceProvider ??= new PieceProvider(); //  for safety
+            pieceProvider ??= new PieceProvider(); //  for safety
             
             _allPieces = new GamePiece[width, height];
             _allTiles = new Tile[width, height];
@@ -58,6 +58,7 @@ namespace Game.Board
         }
 
         #region Input Logic
+        
         private void HandleInput()
         {
             // Touch Start
@@ -145,6 +146,7 @@ namespace Game.Board
             if (matches.Count > 0)
             {
                 // Valid Move
+                GameManager.Instance?.ConsumeMove();
                 ProcessMatches(matches);
                 //Debug.Log($"Match Found! Count: {matches.Count}");
             }
@@ -180,6 +182,12 @@ namespace Game.Board
                 {
                     if (WordManager.Instance != null && WordManager.Instance.IsLetter(piece.Type))
                         WordManager.Instance.CollectLetter(piece.Type, piece.transform.position);
+
+                    if (GameManager.Instance != null)
+                    {
+                        int scoreToAdd = GameManager.Instance.GetCurrentProfile().scorePerPiece;
+                        GameManager.Instance?.AddScore(scoreToAdd);
+                    }
 
                     _allPieces[piece.X, piece.Y] = null;
                     piece.DestroyPiece();
@@ -244,7 +252,7 @@ namespace Game.Board
                         }
                         else
                         {
-                            ItemType type = _pieceProvider.GetNextType();
+                            ItemType type = pieceProvider.GetNextType();
                             Vector2 spawnPos = new Vector2(
                                 _allTiles[x, y].transform.position.x, 
                                 height + 2
@@ -288,7 +296,7 @@ namespace Game.Board
                     
                     do
                     {
-                        randomType = _pieceProvider.GetRandomNormalType();
+                        randomType = pieceProvider.GetRandomNormalType();
                     } 
                     while (HasMatchAt(x, y, randomType) && attempts++ < Max_Gen_Attempts); 
 

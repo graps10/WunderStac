@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using DG.Tweening;
+using Game;
 using Game.Board;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +12,8 @@ namespace UI.Game
         private const float Anim_Target_Scale = 0.5f;
         private const float Anim_Punch_Strength = 0.2f;
         private const float Anim_Punch_Duration = 0.3f;
+
+        private static Color arrivedLetterColor = Color.white;
         
         public static WordManager Instance;
         
@@ -100,7 +103,7 @@ namespace UI.Game
         {
             // Activate slot
             letterSlots[index].sprite = activeLetterSprites[index];
-            letterSlots[index].color = Color.white;
+            letterSlots[index].color = arrivedLetterColor;
             
             // Punch effect
             letterSlots[index].transform.DOPunchScale(Vector3.one * Anim_Punch_Strength, Anim_Punch_Duration);
@@ -127,8 +130,7 @@ namespace UI.Game
             if (_collectedCount >= letterSlots.Count)
             {
                 Debug.Log($"<color=green>WORD COMPLETED! ({_collectedCount}/{letterSlots.Count})</color>");
-                
-                // TODO: GameManager.Instance.WinLevel();
+                GameManager.Instance?.WinLevel();
             }
         }
 
