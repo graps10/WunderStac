@@ -18,19 +18,7 @@ namespace UI.Game
         public void Init(string text, Vector3 worldPos)
         {
             tmpText.text = text;
-            
-            Vector2 screenPoint = Camera.main.WorldToScreenPoint(worldPos);
-            RectTransform parentRect = transform.parent as RectTransform;
-            Vector2 localPoint;
-    
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                parentRect,
-                screenPoint,
-                Camera.main,
-                out localPoint
-            );
-            
-            transform.localPosition = new Vector3(localPoint.x, localPoint.y, 0f);
+            transform.position = Camera.main.WorldToScreenPoint(worldPos);
             
             Sequence seq = DOTween.Sequence();
             transform.localScale = Vector3.zero;

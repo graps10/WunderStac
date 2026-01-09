@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelIndex: 2
   randomSeed: 3527
-  maxMoves: 27
+  maxMoves: 3
   scoreForOneStar: 500
   scoreForTwoStars: 1500
   scoreForThreeStars: 2000

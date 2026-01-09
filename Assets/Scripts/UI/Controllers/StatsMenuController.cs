@@ -2,9 +2,9 @@
 using TMPro;
 using UnityEngine;
 
-namespace UI
+namespace UI.Controllers
 {
-    public class StatsMenu : MonoBehaviour
+    public class StatsMenuController : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField] private TextMeshProUGUI currentLevelText;
@@ -27,8 +27,11 @@ namespace UI
 
             // Combo
             if (highestComboText)
-                highestComboText.text = $"{SaveManager.HighestCombo}x"; // Наприклад "5x"
-
+            {
+                int comboCount = SaveManager.HighestCombo;
+                highestComboText.text = comboCount > 1 ? $"{comboCount}x" : "-";
+            }
+            
             // Games Played
             if (gamesPlayedText)
                 gamesPlayedText.text = SaveManager.GamesPlayed.ToString();

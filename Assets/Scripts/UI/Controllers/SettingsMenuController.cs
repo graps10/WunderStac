@@ -11,13 +11,19 @@ namespace UI.Controllers
         [Header("Controls")]
         [SerializeField] private Slider musicSlider;
         [SerializeField] private Slider sfxSlider;
-        [SerializeField] private Toggle vibrationToggle;
         [SerializeField] private Button languageButton;
         
+        [Header("Toggle Settings")]
+        [SerializeField] private Toggle vibrationToggle;
+        [SerializeField] private ToggleImageChanger toggleImageChanger;
         private void OnEnable()
         {
             musicSlider.onValueChanged.AddListener(OnMusicChanged);
             sfxSlider.onValueChanged.AddListener(OnSFXChanged);
+            
+            bool isVibroOn = SaveManager.IsVibrationOn;
+            vibrationToggle.isOn = isVibroOn;
+            if (toggleImageChanger) toggleImageChanger.UpdateImage(isVibroOn);
             vibrationToggle.onValueChanged.AddListener(OnVibrationChanged);
         }
 
@@ -35,6 +41,7 @@ namespace UI.Controllers
             musicSlider.value = SaveManager.MusicVolume;
             sfxSlider.value = SaveManager.SoundVolume;
             vibrationToggle.isOn = SaveManager.IsVibrationOn;
+            toggleImageChanger.UpdateImage(SaveManager.IsVibrationOn);
         }
 
         private void OnMusicChanged(float value) => AudioManager.Instance.SetMusicVolume(value);
@@ -43,9 +50,10 @@ namespace UI.Controllers
 
         private void OnVibrationChanged(bool isOn)
         {
-            bool newState = !SaveManager.IsVibrationOn;
-            SaveManager.IsVibrationOn = newState;
-            if(newState) VibrationManager.Vibrate();
+            SaveManager.IsVibrationOn = isOn;
+            
+            toggleImageChanger.UpdateImage(isOn);
+            if(isOn) VibrationManager.Vibrate();
         }
     }
 }

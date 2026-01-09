@@ -129,7 +129,8 @@ namespace Game
 
             if (score >= _activeProfile.scoreForThreeStars) return 3;
             if (score >= _activeProfile.scoreForTwoStars) return 2;
-            return 1;
+            if (score >= _activeProfile.scoreForOneStar) return 1;
+            return 0;
         }
         
         public void ShowComboText(string text, Vector3 worldPos)
@@ -144,9 +145,33 @@ namespace Game
 
             MovesLeft--;
             if (uiController) uiController.UpdateMoves(MovesLeft);
-
+        }
+        
+        public void OnTurnCompleted()
+        {
+            if (!IsGameActive) return;
+            
             if (MovesLeft <= 0)
-                CheckEndGameCondition();
+            {
+                Debug.Log("Turn Finished and No Moves Left. Checking Result...");
+                
+                int stars = CalculateStars(CurrentScore);
+
+                if (stars >= 1)
+                {
+                    Debug.Log("WIN via Stars!");
+                    WinLevel(); 
+                }
+                else
+                {
+                    Debug.Log("LOSE. Not enough stars.");
+                    IsGameActive = false;
+                    if (PopupManager.Instance != null)
+                        PopupManager.Instance.ShowLose();
+                        
+                    GameEvents.OnLevelLost?.Invoke();
+                }
+            }
         }
         
         public void WinLevel()

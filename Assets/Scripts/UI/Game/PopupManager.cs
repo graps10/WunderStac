@@ -28,6 +28,7 @@ namespace UI.Game
 
         [Header("Popup Elements")]
         [SerializeField] private Image winTitleImage;
+        [SerializeField] private Image winMessageImage;
         [SerializeField] private Image loseTitleImage;
         [SerializeField] private Image winStarsImage;
         [SerializeField] private TextMeshProUGUI winScoreText;
@@ -35,6 +36,9 @@ namespace UI.Game
         [Header("Sprite Database")]
         //  [0]=Bad, [1]=Good, [2]=Great, [3]=Perfect
         [SerializeField] private Sprite[] titleSprites;
+        
+        //  [0]=1 Star (Blue Impressive), [1]=2 Stars (Sweet Victory), [2]=3 Stars (Orange Impressive)
+        [SerializeField] private Sprite[] messageSprites;
         
         //  [0]=1 Star, [1]=2 Stars, [2]=3 Stars
         [SerializeField] private Sprite[] starSprites;
@@ -98,15 +102,26 @@ namespace UI.Game
                 winTitleImage.sprite = titleSprites[clampedStars];
                 winTitleImage.SetNativeSize();
             }
+            
+            if (winMessageImage && messageSprites.Length >= clampedStars)
+            {
+                winMessageImage.gameObject.SetActive(true);
+                winMessageImage.sprite = messageSprites[clampedStars - 1];
+                winMessageImage.SetNativeSize();
+            }
         }
         
         public void ShowLose()
         {
             losePopup.SetActive(true);
             AnimatePopup(losePopup.transform);
-            
+
             if (loseTitleImage && titleSprites.Length > 0)
+            {
                 loseTitleImage.sprite = titleSprites[0];
+                loseTitleImage.SetNativeSize();
+            }
+                
         }
         
         public void ShowPause()

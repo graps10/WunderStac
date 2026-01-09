@@ -264,7 +264,9 @@ namespace Game.Board
             else
             {
                 //Debug.Log("[TURN END] No more matches. Input Unlocked.");
-                _isSwapping = false; 
+                GameManager.Instance.OnTurnCompleted();
+                if (GameManager.Instance.IsGameActive && GameManager.Instance.MovesLeft > 0)
+                    _isSwapping = false; 
             }
         }
 
