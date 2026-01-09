@@ -187,6 +187,8 @@ namespace Game.Board
             
             if (_comboMultiplier > 1)
             {
+                GameEvents.OnComboUpdated?.Invoke(_comboMultiplier);
+                
                 string praise = GetComboText(_comboMultiplier);
                 GameManager.Instance.ShowComboText(praise, centerPos);
             }

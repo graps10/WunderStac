@@ -1,10 +1,11 @@
 ﻿using DG.Tweening;
+using Game;
 using TMPro;
 using UI.Game;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Game
+namespace UI.Controllers
 {
     public class GameUIController : MonoBehaviour
     {

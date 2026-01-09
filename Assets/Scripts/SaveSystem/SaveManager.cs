@@ -4,8 +4,14 @@ namespace SaveSystem
 {
     public static class SaveManager
     {
-        // Game
+        // Progression
         private const string Key_CurrentLevel = "Progress_CurrentLevel";
+        
+        // Stats
+        private const string Key_BestScore = "Stats_BestScore";
+        private const string Key_HighestCombo = "Stats_HighestCombo";
+        private const string Key_GamesPlayed = "Stats_GamesPlayed";
+        private const string Key_WordsCompleted = "Stats_WordsCompleted";
         
         // Settings
         private const string Key_SoundVol = "Settings_Sound_Vol";
@@ -15,11 +21,45 @@ namespace SaveSystem
         public static int CurrentLevel
         {
             get => PlayerPrefs.GetInt(Key_CurrentLevel, 1);
-            set
+            set { PlayerPrefs.SetInt(Key_CurrentLevel, value); Save(); }
+        }
+        
+        public static int BestScore
+        {
+            get => PlayerPrefs.GetInt(Key_BestScore, 0);
+            set 
             {
-                PlayerPrefs.SetInt(Key_CurrentLevel, value);
-                PlayerPrefs.Save();
+                if (value > BestScore) 
+                {
+                    PlayerPrefs.SetInt(Key_BestScore, value);
+                    Save();
+                }
             }
+        }
+
+        public static int HighestCombo
+        {
+            get => PlayerPrefs.GetInt(Key_HighestCombo, 0);
+            set 
+            {
+                if (value > HighestCombo)
+                {
+                    PlayerPrefs.SetInt(Key_HighestCombo, value);
+                    Save();
+                }
+            }
+        }
+
+        public static int GamesPlayed
+        {
+            get => PlayerPrefs.GetInt(Key_GamesPlayed, 0);
+            set { PlayerPrefs.SetInt(Key_GamesPlayed, value); Save(); }
+        }
+
+        public static int WordsCompleted
+        {
+            get => PlayerPrefs.GetInt(Key_WordsCompleted, 0);
+            set { PlayerPrefs.SetInt(Key_WordsCompleted, value); Save(); }
         }
         
         public static float MusicVolume
@@ -28,7 +68,7 @@ namespace SaveSystem
             set
             {
                 PlayerPrefs.SetFloat(Key_MusicVol, value);
-                PlayerPrefs.Save();
+                Save();
             }
         }
 
@@ -38,7 +78,7 @@ namespace SaveSystem
             set
             {
                 PlayerPrefs.SetFloat(Key_SoundVol, value);
-                PlayerPrefs.Save();
+                Save();
             }
         }
 

@@ -130,6 +130,7 @@ namespace UI.Game
             if (_collectedCount >= letterSlots.Count)
             {
                 Debug.Log($"<color=green>WORD COMPLETED! ({_collectedCount}/{letterSlots.Count})</color>");
+                GameEvents.OnWordCompleted?.Invoke();
                 GameManager.Instance?.WinLevel();
             }
         }

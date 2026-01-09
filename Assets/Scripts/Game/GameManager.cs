@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Game.Level;
 using SaveSystem;
+using UI.Controllers;
 using UI.Game;
 using UnityEngine;
 
@@ -90,6 +91,8 @@ namespace Game
             IsPaused = false;
             Time.timeScale = 1f;
             
+            GameEvents.OnGameStarted?.Invoke();
+            
             if (uiController != null)
                 uiController.ShowStartButton(false);
         }
@@ -175,6 +178,8 @@ namespace Game
             
             yield return new WaitForSeconds(Win_Seq_Delay_End);
             
+            GameEvents.OnLevelWon?.Invoke();
+            
             int starCount = CalculateStars(CurrentScore);
             SaveManager.CurrentLevel = _currentLevelIndex + 1;
             
@@ -188,10 +193,24 @@ namespace Game
         {
             if (MovesLeft <= 0)
             {
-                Debug.Log("No Moves Left! Checking for Win/Loss...");
+                Debug.Log("No Moves Left! Checking Result...");
                 IsGameActive = false;
                 
-                PopupManager.Instance.ShowLose();
+                int stars = CalculateStars(CurrentScore);
+
+                if (stars >= 1)
+                {
+                    Debug.Log("Moves out, but Score is enough! WIN.");
+                    WinLevel(); 
+                }
+                else
+                {
+                    Debug.Log("Moves out and Score too low. LOSE.");
+                    if (PopupManager.Instance != null)
+                        PopupManager.Instance.ShowLose();
+                        
+                    GameEvents.OnLevelLost?.Invoke();
+                }
             }
         }
         
