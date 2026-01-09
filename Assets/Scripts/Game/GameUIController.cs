@@ -1,6 +1,8 @@
 ﻿using DG.Tweening;
 using TMPro;
+using UI.Game;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Game
 {
@@ -16,16 +18,61 @@ namespace Game
         [SerializeField] private TextMeshProUGUI movesText;
         [SerializeField] private TextMeshProUGUI levelText;
         
+        [Header("Progress")]
+        [SerializeField] private Slider scoreSlider;
+        
+        [Header("Buttons")]
+        [SerializeField] private Button startButton;
+        [SerializeField] private Button pauseButton;
+        
         [Header("Appearance Settings")]
         [SerializeField] private Color normalColor = Color.white;
         [SerializeField] private Color warningColor = Color.red;
+        
+        [Header("Floating Text")]
+        [SerializeField] private FloatingText floatingTextPrefab;
+        [SerializeField] private Transform floatingTextContainer;
 
         private int _displayedScore;
+        
+        private void OnEnable()
+        {
+            if (startButton) 
+                startButton.onClick.AddListener(() => GameManager.Instance.StartLevel());
+            
+            if (pauseButton) 
+                pauseButton.onClick.AddListener(() => GameManager.Instance.TogglePause());
+        }
+        
+        private void OnDisable()
+        {
+            if (startButton) startButton.onClick.RemoveAllListeners();
+            if (pauseButton) pauseButton.onClick.RemoveAllListeners();
+        }
+        
+        public void InitScoreSlider(int maxScore)
+        {
+            if (scoreSlider)
+            {
+                scoreSlider.maxValue = maxScore;
+                scoreSlider.value = 0;
+            }
+        }
+        
+        public void ShowStartButton(bool show)
+        {
+            if (startButton) startButton.gameObject.SetActive(show);
+            if (pauseButton) pauseButton.gameObject.SetActive(!show);
+        }
         
         public void UpdateScore(int newScore)
         {
             DOTween.To(() => _displayedScore, x => _displayedScore = x, newScore, Anim_Count_Duration)
-                .OnUpdate(() => scoreText.text = _displayedScore.ToString());
+                .OnUpdate(() => 
+                {
+                    scoreText.text = _displayedScore.ToString();
+                    if (scoreSlider) scoreSlider.value = _displayedScore;
+                });
             
             scoreText.transform.DOKill(); 
             scoreText.transform.localScale = Vector3.one;
@@ -44,5 +91,13 @@ namespace Game
         }
         
         public void SetLevelText(int level) => levelText.text = $"Level {level}";
+        
+        public void SpawnFloatingText(string text, Vector3 worldPos)
+        {
+            if (!floatingTextPrefab) return;
+
+            var ft = Instantiate(floatingTextPrefab, floatingTextContainer);
+            ft.Init(text, worldPos);
+        }
     }
 }

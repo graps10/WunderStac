@@ -1,5 +1,6 @@
 ﻿using Core.Enums;
 using DG.Tweening;
+using Game;
 using SceneControl;
 using TMPro;
 using UnityEngine;
@@ -13,6 +14,8 @@ namespace UI.Game
         private const float Anim_Star_Punch_Scale = 0.3f;
         private const float Anim_Star_Punch_Duration = 0.5f;
         private const float Anim_Star_Delay = 0.2f;
+        private const float Anim_Pause_Duration = 0.5f;
+        
         private const int Min_Stars = 1;
         private const int Max_Stars = 3;
         
@@ -39,6 +42,7 @@ namespace UI.Game
         [Header("Buttons")]
         [SerializeField] private Button nextButton;
         [SerializeField] private Button retryButton;
+        [SerializeField] private Button resumeButton;
 
         private void Awake()
         {
@@ -52,12 +56,25 @@ namespace UI.Game
         {
             if (nextButton) nextButton.onClick.AddListener(OnNextClicked);
             if (retryButton) retryButton.onClick.AddListener(OnRetryClicked);
+
+            if (resumeButton)
+            {
+                resumeButton.onClick.AddListener(GameManager.Instance.TogglePause);
+                resumeButton.onClick.AddListener(HidePause);
+            }
+                
         }
 
         private void OnDisable()
         {
             if (nextButton) nextButton.onClick.RemoveListener(OnNextClicked);
             if (retryButton) retryButton.onClick.RemoveListener(OnRetryClicked);
+            
+            if (resumeButton)
+            {
+                resumeButton.onClick.RemoveListener(GameManager.Instance.TogglePause);
+                resumeButton.onClick.RemoveListener(HidePause);
+            }
         }
         
         public void ShowWin(int score, int starCount)
@@ -91,6 +108,15 @@ namespace UI.Game
             if (loseTitleImage && titleSprites.Length > 0)
                 loseTitleImage.sprite = titleSprites[0];
         }
+        
+        public void ShowPause()
+        {
+            pausePopup.SetActive(true);
+            pausePopup.transform.localScale = Vector3.zero;
+            pausePopup.transform.DOScale(1f, Anim_Pause_Duration).SetEase(Ease.OutBack).SetUpdate(true);
+        }
+
+        public void HidePause() => pausePopup.SetActive(false);
 
         private void AnimatePopup(Transform popupContent)
         {
@@ -98,7 +124,7 @@ namespace UI.Game
             popupContent.DOScale(1f, Anim_Popup_Duration).SetEase(Ease.OutBack);
         }
 
-        private void OnNextClicked() => SceneLoader.Instance.LoadScene(UnityScenes.MainMenu);
+        private void OnNextClicked() => SceneLoader.Instance.LoadScene(UnityScenes.Game);
         private void OnRetryClicked() => SceneLoader.Instance.LoadScene(UnityScenes.Game);
 
         #region Test

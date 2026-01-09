@@ -12,13 +12,15 @@ namespace Game.Board
         private const float Destroy_Delay = 0.2f;
         private const float Letters_Collect_Delay = 0.3f;
         private const int Max_Gen_Attempts = 100;
-        private const int Grid_Offset_Formula_Denom = 2; // For centering logic
-        private const float Grid_Offset_Formula_Add = 0.5f;
+        // Layout Constants
+        private const float Cell_Size = 0.48f; 
+        private const int Spawn_Y_Offset = 2;
         
-        [Header("Settings")]
+        [Header("Layout Settings")] 
         [SerializeField] private int width = 6;
         [SerializeField] private int height = 7;
-        [SerializeField] private float spacing = 0.1f;
+        [SerializeField] private float spacing = 0.15f; 
+        [SerializeField] private float boardYOffset;
         
         [Header("Generation Logic")]
         [SerializeField] private PieceProvider pieceProvider;
@@ -37,6 +39,8 @@ namespace Game.Board
         private GamePiece[,] _allPieces;
         private Tile[,] _allTiles;
         
+        private int _comboMultiplier;
+        
         private GamePiece _selectedPiece;
         private Vector2 _startTouchPos;
         private Vector2 _endTouchPos;
@@ -54,7 +58,9 @@ namespace Game.Board
         
         private void Update()
         {
-            if (_isSwapping) return;
+            if (_isSwapping || !GameManager.Instance.IsGameActive) 
+                return;
+            
             HandleInput();
         }
 
@@ -121,6 +127,7 @@ namespace Game.Board
         private IEnumerator SwapPiecesRoutine(GamePiece pieceA, GamePiece pieceB)
         {
             _isSwapping = true;
+            _comboMultiplier = 0;
             
             // Data Swap
             int xA = pieceA.X; int xB = pieceB.X;
@@ -172,6 +179,18 @@ namespace Game.Board
 
         private IEnumerator ProcessMatchesRoutine(List<GamePiece> matches)
         {
+            _comboMultiplier++;
+            
+            Vector3 centerPos = Vector3.zero;
+            foreach (var p in matches) centerPos += p.transform.position;
+            centerPos /= matches.Count;
+            
+            if (_comboMultiplier > 1)
+            {
+                string praise = GetComboText(_comboMultiplier);
+                GameManager.Instance.ShowComboText(praise, centerPos);
+            }
+            
             HashSet<GamePiece> piecesToDestroy = new HashSet<GamePiece>(matches);
             
             foreach (var piece in matches)
@@ -281,7 +300,7 @@ namespace Game.Board
                             ItemType type = pieceProvider.GetNextType();
                             Vector2 spawnPos = new Vector2(
                                 _allTiles[x, y].transform.position.x, 
-                                height + 2
+                                height + Spawn_Y_Offset
                             );
                             
                             CreatePieceAt(x, y, spawnPos, type);
@@ -301,16 +320,20 @@ namespace Game.Board
         
         #region #region Generation & Helpers
         
-        private void GenerateBoard()
+        private void GenerateBoard() // Magic Numbers
         {
-            float startX = -(width / (float)Grid_Offset_Formula_Denom) + Grid_Offset_Formula_Add;
-            float startY = -(height / (float)Grid_Offset_Formula_Denom) + Grid_Offset_Formula_Add;
-
+            float step = Cell_Size + spacing;
+            float startX = -((width - 1) * step) / 2f;
+            float startY = -((height - 1) * step) / 2f + boardYOffset;
+            
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
-                    Vector2 position = new Vector2(startX + x, startY + y);
+                    Vector2 position = new Vector2(
+                        startX + (x * step), 
+                        startY + (y * step)
+                    );
                     
                     // Create Tile Background
                     Tile tile = Instantiate(tilePrefab, position, Quaternion.identity, transform);
@@ -375,6 +398,16 @@ namespace Game.Board
                     //Debug.Log($"<color=orange>[NEIGHBOR HIT] Found Letter {neighbor.Type} at [{x}, {y}]. It was neighbor to a match!</color>");
                     set.Add(neighbor);
                 }
+            }
+        }
+        
+        private string GetComboText(int combo)
+        {
+            switch (combo)
+            {
+                case 2: return "Good!";
+                case 3: return "Excellent!";
+                default: return $"Combo x{combo}!";
             }
         }
 

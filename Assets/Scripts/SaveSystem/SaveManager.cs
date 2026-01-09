@@ -4,9 +4,23 @@ namespace SaveSystem
 {
     public static class SaveManager
     {
+        // Game
+        private const string Key_CurrentLevel = "Progress_CurrentLevel";
+        
+        // Settings
         private const string Key_SoundVol = "Settings_Sound_Vol";
         private const string Key_MusicVol = "Settings_Music_Vol";
         private const string Key_Vibration = "Settings_Vibration";
+
+        public static int CurrentLevel
+        {
+            get => PlayerPrefs.GetInt(Key_CurrentLevel, 1);
+            set
+            {
+                PlayerPrefs.SetInt(Key_CurrentLevel, value);
+                PlayerPrefs.Save();
+            }
+        }
         
         public static float MusicVolume
         {
